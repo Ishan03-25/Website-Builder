@@ -22,3 +22,7 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# #Node Modules
+# node_modules/
+#By writing this I have written to ignore node modules twice

@@ -10,6 +10,9 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@monaco-editor/react": "^4.7.0",
+    "@webcontainer/api": "^1.5.1-internal.9",
+    "lucide-react": "^0.475.0",
     "react": "^19.0.0",
     "react-dom": "^19.0.0"
   },
