@@ -7,7 +7,7 @@ import { useEffect, useState } from 'react';
 // }
 
 interface PreviewFrameProps {
-    files: File[];
+    // files: File[];
     webContainer: WebContainer;
   }
 
