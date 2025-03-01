@@ -1,3 +1,4 @@
+import axios from "axios";
 import { Wand2 } from "lucide-react";
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
@@ -8,9 +9,33 @@ export default function Home() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (prompt.trim()){
-        navigate("/builder", {state: prompt});
-    }  
+
+    async function handleTemplateRequest() {
+      try {
+        console.log("Template Request initiated");
+        console.log(
+          "Prompt in template request: ",
+          prompt,
+          ";And its type: ",
+          typeof prompt
+        );
+        const res = await axios.post(
+          "http://localhost:3000/template",
+          {
+            prompt: prompt,
+          }
+        );
+        const templateData = res.data;
+        console.log("Template Data: ", templateData);
+        if (prompt.trim()){
+          navigate("/builder", {state: [prompt, templateData]})
+        }
+      } catch (error) {
+        console.log("Error in template request: ", error);
+      }
+    }
+
+    handleTemplateRequest();
   }
 
   return (

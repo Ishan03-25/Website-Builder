@@ -1,5 +1,6 @@
 import { WebContainer } from '@webcontainer/api';
 import { useEffect, useState } from 'react';
+import { FileItem } from '../types';
 
 // interface PreviewFrameProps {
 //   files: any[];
@@ -7,11 +8,12 @@ import { useEffect, useState } from 'react';
 // }
 
 interface PreviewFrameProps {
-    // files: File[];
+    files: FileItem[];
     webContainer: WebContainer;
   }
 
-export function PreviewFrame({ webContainer }: PreviewFrameProps) {
+export function PreviewFrame({ webContainer, files}: PreviewFrameProps) {
+  console.log("Files in preview frame: ", files);
   // In a real implementation, this would compile and render the preview
   const [url, setUrl] = useState("");
 
@@ -33,6 +35,8 @@ export function PreviewFrame({ webContainer }: PreviewFrameProps) {
       console.log(port)
       setUrl(url);
     });
+
+    // webContainer.mount(files);
   }
 
   useEffect(() => {
