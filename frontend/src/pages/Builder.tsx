@@ -22,6 +22,8 @@ import { parseXml } from "../steps";
 export default function Builder() {
   const location = useLocation();
   const [prompt, setPrompt] = useState("");
+  const [uiPrompt, setUiPrompt] = useState("");
+  const [CodePrompt, SetCodePrompt] = useState([]);
   // const { prompt } = location.state;
   console.log("location: ", location);
   // const prompt = "Create a todo app frontend in react";
@@ -47,11 +49,17 @@ export default function Builder() {
   //   instance: !!webcontainer
   // });
 
-  useEffect(()=>{
-    if (location.state){
-      setPrompt(location.state);
+  useEffect(() => {
+    if (location.state) {
+      console.log("Location state: ", location);
+      setPrompt(location.state[0]);
+      setUiPrompt(location.state[1].uiPrompts);
+      SetCodePrompt(location.state[1].prompts);
+      console.log("Prompt: ", prompt);
+      console.log("Code Prompt: ", CodePrompt);
+      console.log("UiPrompt: ", uiPrompt);
     }
-  })
+  });
 
   useEffect(() => {
     console.log("Initial Files: ", files);
@@ -216,90 +224,90 @@ export default function Builder() {
   // init();
 
   // In your useEffect for initialization
-  useEffect(() => {
-    async function init() {
-      try {
-        console.log("Template Request initiated");
-        console.log(
-          "Prompt in template request: ",
-          prompt,
-          ";And its type: ",
-          typeof prompt
-        );
-        const res = await axios.post(
-          "http://localhost:3000/template",
-          {
-            prompt: prompt,
-          },
-          { timeout: 50000 }
-        );
+  // useEffect(() => {
+  //   async function init() {
+  //     try {
+  //       console.log("Template Request initiated");
+  //       console.log(
+  //         "Prompt in template request: ",
+  //         prompt,
+  //         ";And its type: ",
+  //         typeof prompt
+  //       );
+  //       const res = await axios.post(
+  //         "http://localhost:3000/template",
+  //         {
+  //           prompt: prompt,
+  //         },
+  //         { timeout: 50000 }
+  //       );
 
-        console.log("Template Response: ", res.data);
+  //       console.log("Template Response: ", res.data);
 
-        setTemplateSet(true);
-        const { prompts, uiPrompts } = res.data;
+  //       setTemplateSet(true);
+  //       const { prompts, uiPrompts } = res.data;
 
-        console.log("After template response, Prompts: ", prompts);
-        console.log("uiPrompts: ", uiPrompts);
+  //       console.log("After template response, Prompts: ", prompts);
+  //       console.log("uiPrompts: ", uiPrompts);
 
-        const parsedSteps = parseXml(uiPrompts);
+  //       const parsedSteps = parseXml(uiPrompts);
 
-        setSteps(
-          parsedSteps.map((x: Step) => ({
-            ...x,
-            status: "pending",
-          }))
-        );
+  //       setSteps(
+  //         parsedSteps.map((x: Step) => ({
+  //           ...x,
+  //           status: "pending",
+  //         }))
+  //       );
 
-        console.log("After Template Request, Steps: ", steps);
+  //       console.log("After Template Request, Steps: ", steps);
 
-        try {
-          console.log("Messages sending in chat endpoint: ", [
-            ...prompts,
-            prompt,
-          ]);
-          const messages = prompts.map((text: string) => ({
-            role: "user",
-            parts: [{ text: text }],
-          }));
-          messages.push({
-            role: "user",
-            parts: [{ text: prompt }],
-          });
-          const stepsResponse = await axios.post("http://localhost:3000/chat", {
-            messages: [...prompts, prompt],
-          });
-          console.log("StepsResponse chat request: ", stepsResponse);
+  //       try {
+  //         console.log("Messages sending in chat endpoint: ", [
+  //           ...prompts,
+  //           prompt,
+  //         ]);
+  //         const messages = prompts.map((text: string) => ({
+  //           role: "user",
+  //           parts: [{ text: text }],
+  //         }));
+  //         messages.push({
+  //           role: "user",
+  //           parts: [{ text: prompt }],
+  //         });
+  //         const stepsResponse = await axios.post("http://localhost:3000/chat", {
+  //           messages: [...prompts, prompt],
+  //         });
+  //         console.log("StepsResponse chat request: ", stepsResponse);
 
-          const responseString =
-            typeof stepsResponse.data === "string"
-              ? stepsResponse.data
-              : JSON.stringify(stepsResponse.data);
+  //         const responseString =
+  //           typeof stepsResponse.data === "string"
+  //             ? stepsResponse.data
+  //             : JSON.stringify(stepsResponse.data);
 
-          const parsedStepsResponse = parseXml(responseString);
-          setSteps((s) => [
-            ...s,
-            ...parsedStepsResponse.map((X) => ({
-              ...X,
-              status: "pending" as const,
-            })),
-          ]);
-        } catch (error) {
-          console.log("Error in chat request: ", error);
-        }
-      } catch (error) {
-        console.log("Request error:", error);
-        // Add proper error state handling
-        setSteps([]);
-        setTemplateSet(false);
-      }
-    }
+  //         const parsedStepsResponse = parseXml(responseString);
+  //         setSteps((s) => [
+  //           ...s,
+  //           ...parsedStepsResponse.map((X) => ({
+  //             ...X,
+  //             status: "pending" as const,
+  //           })),
+  //         ]);
+  //       } catch (error) {
+  //         console.log("Error in chat request: ", error);
+  //       }
+  //     } catch (error) {
+  //       console.log("Request error:", error);
+  //       // Add proper error state handling
+  //       setSteps([]);
+  //       setTemplateSet(false);
+  //     }
+  //   }
 
-    // Only run if prompt exists
-    if (prompt) {
-      init();
-    }
-  }, [prompt]); // Add prompt as dependency
+  //   // Only run if prompt exists
+  //   if (prompt) {
+  //     init();
+  //   }
+  // }, [prompt]); // Add prompt as dependency
 
   // Remove the standalone init() call from the component body
 
@@ -308,6 +316,57 @@ export default function Builder() {
   //   WebContainer failed to initialize. Check console.
   // </div>
   // }
+
+  useEffect(() => {
+    async function handleChatRequest() {
+      setTemplateSet(true);
+      const parsedSteps = parseXml(uiPrompt);
+      setSteps(
+        parsedSteps.map((x) => ({
+          ...x,
+          status: "pending",
+        }))
+      );
+      console.log("Handlechatrequest, steps: ", steps);
+      // const messages = CodePrompt.map((text: string) => ({
+      //   role: "user",
+      //   parts: [{ text: text }],
+      // }));
+      // messages.push({
+      //   role: "user",
+      //   parts: [{ text: prompt }],
+      // });
+      // console.log("Messages: ", messages);
+      try {
+        const stepsReponse = await axios.post("http://localhost:3000/chat", {
+          message: [...CodePrompt, prompt],
+        });
+        console.log("StepsResponse: ", stepsReponse.data);
+        const responseString =
+          typeof stepsReponse.data === "string"
+            ? stepsReponse.data
+            : JSON.stringify(stepsReponse.data);
+        console.log("Response String: ", responseString);
+        const parsedStepsResponse = parseXml(responseString);
+        setSteps((s) => ({
+          ...s,
+          ...parsedStepsResponse.map((x) => ({
+            ...x,
+            status: "pending" as const,
+          })),
+        }));
+      } catch (error) {
+        console.log("Error in chat request: ", error);
+        setSteps([]);
+        setTemplateSet(false);
+      }
+    }
+
+    if (prompt) {
+      console.log("Chat request initiated");
+      handleChatRequest();
+    }
+  }, [prompt]);
 
   return (
     <div className="min-h-screen bg-gray-900 flex flex-col">
