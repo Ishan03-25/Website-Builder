@@ -179,39 +179,46 @@ app.post("/chat", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const model = genAI_2.getGenerativeModel({
         model: "gemini-1.5-pro",
     });
-    // const result = await model.generateContentStream({
-    //     contents: [
-    //         {
-    //             role: 'user',
-    //             parts: [
-    //                 {
-    //                     text: getSystemPrompt(),
-    //                 }
-    //             ]
-    //         },
-    //         {
-    //             role: 'user',
-    //             parts: [
-    //                 {
-    //                     text: message,
-    //                 }
-    //             ]
-    //         }
-    //     ]
-    // });
-    const controller = new AbortController();
-    const timeout = setTimeout(() => controller.abort(), 5000);
+    // const controller = new AbortController();
+    // const timeout = setTimeout(()=>controller.abort(), 5000)
     try {
+        //   const result = await model.generateContentStream({
+        //     contents: [
+        //         {
+        //             role: 'user',
+        //             parts: [
+        //                 {
+        //                     text: getSystemPrompt(),
+        //                 }
+        //             ]
+        //         },
+        //         {
+        //             role: 'user',
+        //             parts: [
+        //                 {
+        //                     text: message,
+        //                 }
+        //             ]
+        //         }
+        //     ]
+        // });
+        //   const chat = model.startChat({
+        //     tools: [
+        //         {
+        //             codeExecution: {},
+        //         }
+        //     ],
+        //     history: [
+        //       {
+        //         role: "user",
+        //         parts: [{text: getSystemPrompt()}]
+        //       }
+        //     ]
+        // });
         const chat = model.startChat({
             tools: [
                 {
-                    codeExecution: {},
-                }
-            ],
-            history: [
-                {
-                    role: "user",
-                    parts: [{ text: (0, prompts_1.getSystemPrompt)() }]
+                    codeExecution: {}
                 }
             ]
         });
@@ -239,11 +246,11 @@ app.post("/chat", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
         console.log("Full Response: ", fullResponse);
         res.json({ message: fullResponse });
         console.log("Chat endpoint response completed and sent.");
-        clearTimeout(timeout);
+        // clearTimeout(timeout);
         return;
     }
     catch (error) {
-        clearTimeout(timeout);
+        // clearTimeout(timeout);
         console.log("Error in startChat: ", error);
     }
 }));

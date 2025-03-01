@@ -1,4 +1,4 @@
-import express from "express";
+import express, { text } from "express";
 import cors from "cors";
 import { GoogleGenerativeAI } from "@google/generative-ai";
 import * as dotenv from "dotenv";
@@ -135,8 +135,13 @@ app.post("/chat", async (req, res) => {
     const model = genAI_2.getGenerativeModel({
         model: "gemini-1.5-pro",
     });
-    
-    // const result = await model.generateContentStream({
+
+    // const controller = new AbortController();
+    // const timeout = setTimeout(()=>controller.abort(), 5000)
+
+    try {
+
+    //   const result = await model.generateContentStream({
     //     contents: [
     //         {
     //             role: 'user',
@@ -156,23 +161,27 @@ app.post("/chat", async (req, res) => {
     //         }
     //     ]
     // });
+      
+    //   const chat = model.startChat({
+    //     tools: [
+    //         {
+    //             codeExecution: {},
+    //         }
+    //     ],
+    //     history: [
+    //       {
+    //         role: "user",
+    //         parts: [{text: getSystemPrompt()}]
+    //       }
+    //     ]
+    // });
 
-    const controller = new AbortController();
-    const timeout = setTimeout(()=>controller.abort(), 5000)
-
-    try {
-      const chat = model.startChat({
-        tools: [
-            {
-                codeExecution: {},
-            }
-        ],
-        history: [
-          {
-            role: "user",
-            parts: [{text: getSystemPrompt()}]
-          }
-        ]
+    const chat  = model.startChat({
+      tools: [
+        {
+          codeExecution: {}
+        }
+      ]
     });
 
     const result = await chat.sendMessageStream(message);
@@ -189,10 +198,10 @@ app.post("/chat", async (req, res) => {
     console.log("Full Response: ", fullResponse);
     res.json({message: fullResponse});
     console.log("Chat endpoint response completed and sent.");
-    clearTimeout(timeout);
+    // clearTimeout(timeout);
     return;
     } catch (error) {
-      clearTimeout(timeout);
+      // clearTimeout(timeout);
       console.log("Error in startChat: ", error);
     }
 })
