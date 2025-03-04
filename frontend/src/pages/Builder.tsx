@@ -64,7 +64,7 @@ export default function Builder() {
   useEffect(() => {
     console.log("Initial Files: ", files);
     console.log("Processing Steps: ", steps);
-    let originalFiles = { ...files };
+    let originalFiles = [ ...files ];
     let updateHappened = false;
     steps
       .filter(({ status }) => status === "pending")
@@ -72,7 +72,7 @@ export default function Builder() {
         updateHappened = true;
         if (step.type === StepType.CreateFile) {
           let parsedPath = step.path?.split("/") ?? [];
-          let currentFileStructure = { ...originalFiles };
+          let currentFileStructure = [ ...originalFiles ];
           const finalAnswerRef = currentFileStructure;
 
           let currentFolder = "";
@@ -83,7 +83,7 @@ export default function Builder() {
 
             if (!parsedPath.length) {
               const file = currentFileStructure.find(
-                (x) => x.name === currentFolderName
+                (x) => {x.name === currentFolderName}
               );
               if (!file) {
                 currentFileStructure.push({
@@ -113,7 +113,7 @@ export default function Builder() {
               }
             }
           }
-          originalFiles = finalAnswerRef;
+          originalFiles = [...finalAnswerRef];
         }
       });
 
@@ -320,7 +320,7 @@ export default function Builder() {
   useEffect(() => {
     async function handleChatRequest() {
       setTemplateSet(true);
-      const parsedSteps = parseXml(uiPrompt);
+      const parsedSteps = parseXml(uiPrompt) || [] ;
       setSteps(
         parsedSteps.map((x) => ({
           ...x,
@@ -338,23 +338,26 @@ export default function Builder() {
       // });
       // console.log("Messages: ", messages);
       try {
-        const stepsReponse = await axios.post("http://localhost:3000/chat", {
-          message: [...CodePrompt, prompt],
+        console.log("Chat request has initiated");
+        const stepsResponse = await axios.post("http://localhost:3000/chat", {
+          messages: [...CodePrompt, prompt],
         });
-        console.log("StepsResponse: ", stepsReponse.data);
+        console.log("StepsResponse: ", stepsResponse);
         const responseString =
-          typeof stepsReponse.data === "string"
-            ? stepsReponse.data
-            : JSON.stringify(stepsReponse.data);
+          typeof stepsResponse.data === "string"
+            ? stepsResponse.data
+            : JSON.stringify(stepsResponse);
         console.log("Response String: ", responseString);
-        const parsedStepsResponse = parseXml(responseString);
-        setSteps((s) => ({
+        const parsedStepsResponse = parseXml(responseString) || [];
+        setSteps((s) => ([
           ...s,
           ...parsedStepsResponse.map((x) => ({
             ...x,
             status: "pending" as const,
           })),
-        }));
+        ]));
+        console.log("Steps: ", steps);
+        console.log("Type of steps: ", typeof(steps));
       } catch (error) {
         console.log("Error in chat request: ", error);
         setSteps([]);

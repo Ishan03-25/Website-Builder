@@ -28,5 +28,6 @@ export default defineConfig({
       "Cross-Origin-Embedder-Policy": "credentialless",
       "Cross-Origin-Opener-Policy": "same-origin"
     }
-  }
+  },
+  
 })
