@@ -129,7 +129,7 @@ app.post("/template", async (req, res) => {
 app.post("/chat", async (req, res) => {
   console.log("----------------------------------------------------------------------------------")
   console.log("Chat enpoint initiated");
-  console.log("request message in chat endpoint: ", req.body);
+  console.log("request message in chat endpoint: ", req.body.messages);
   console.log("Type of message in chat endpoint: ", typeof(req.body.messages));
     const message = req.body.messages;
     const model = genAI_2.getGenerativeModel({
@@ -162,27 +162,27 @@ app.post("/chat", async (req, res) => {
     //     ]
     // });
       
-    //   const chat = model.startChat({
-    //     tools: [
-    //         {
-    //             codeExecution: {},
-    //         }
-    //     ],
-    //     history: [
-    //       {
-    //         role: "user",
-    //         parts: [{text: getSystemPrompt()}]
-    //       }
-    //     ]
-    // });
-
-    const chat  = model.startChat({
-      tools: [
-        {
-          codeExecution: {}
-        }
-      ]
+      const chat = model.startChat({
+        tools: [
+            {
+                codeExecution: {},
+            }
+        ],
+        history: [
+          {
+            role: "user",
+            parts: [{text: getSystemPrompt()}]
+          }
+        ]
     });
+
+    // const chat  = model.startChat({
+    //   tools: [
+    //     {
+    //       codeExecution: {}
+    //     }
+    //   ]
+    // });
 
     const result = await chat.sendMessageStream(message);
 
